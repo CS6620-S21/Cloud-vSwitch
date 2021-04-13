@@ -4,6 +4,7 @@ FROM node:14-alpine as base
 RUN apk update
 RUN apk add openssl
 RUN apk add easy-rsa
+ENV EASYRSA="/usr/share/easy-rsa"
 ENV PATH="$PATH:/usr/share/easy-rsa"
 
 # Set up app directory and port
