@@ -6,6 +6,11 @@ const path = require("path");
 const admin = require("firebase-admin");
 const { exec } = require("child_process");
 
+// Turn off console log in production mode
+if (process.env.NODE_ENV === "production") {
+  console.log = function () {};
+}
+
 // Config easy-rsa
 exec("sh scripts/easyrsa_vars.sh", (error, stdout, stderr) => {
   if (error) {
