@@ -76,16 +76,26 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 
 app.get("/ca", (req, res) => {
   // TODO: Add logic for user auth and database
-  exec("sh scripts/gen_ca.sh vswitch", (error, stdout, stderr) => {
+  const cn = "vswitch";
+
+  exec(`sh scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
     if (error) {
       res.sendStatus(500);
-      console.error(`ca error: ${error.message}`);
+      console.error(`CA build exec error: ${error.message}`);
       return;
     }
-    res.sendStatus(200);
+
     // build-ca command outputs to stderr
-    console.error(`ca stderr:\n${stderr}`);
-    console.log(`ca stdout:\n${stdout}`);
+    console.error(`CA build stderr:\n${stderr}`);
+    console.log(`CA build stdout:\n${stdout}`);
+
+    // Send generated CA cert
+    res.sendFile(`/etc/pki/${cn}/ca.crt`, (err) => {
+      if (err) {
+        res.sendStatus(500);
+        console.error(`CA send error: ${err.message}`);
+      }
+    });
   });
 });
 
