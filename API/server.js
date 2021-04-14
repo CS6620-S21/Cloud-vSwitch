@@ -4,6 +4,17 @@ const helmet = require("helmet");
 const cors = require("cors");
 const path = require("path");
 const admin = require("firebase-admin");
+const { exec } = require("child_process");
+
+// Config easy-rsa
+exec("sh scripts/easyrsa_vars.sh", (error, stdout, stderr) => {
+  if (error) {
+    console.error(`easyrsa_vars error: ${error.message}`);
+  }
+  if (stderr) {
+    console.error(`easyrsa_vars stderr:\n${stderr}`);
+  }
+});
 
 // Set up Firebase
 admin.initializeApp({
@@ -34,56 +45,44 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// const users = [
-//   {
-//     id: 1,
-//     userName: "yoda",
-//     password: "YODA900",
-//     email: "yoda@gmail.com",
-//     org: "Star Wars",
-//   },
-//   {
-//     id: 2,
-//     userName: "darthmaul",
-//     password: "DarthMaul200",
-//     email: "darthmaul@gmail.com",
-//     org: "Star Wars",
-//   },
-//   {
-//     id: 3,
-//     userName: "obiwankenobi",
-//     password: "ObiWanKenobi55",
-//     email: "obiwankenobi@gmail.com",
-//     org: "Star Wars",
-//   },
-// ];
-
 // Routes
 
 // Basic route that sends the user first to the AJAX Page
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 
-// Get a collection of users
-// app.get("/api/users", (req, res) => res.json(users));
-
-// Get a user by userId
-// app.get("/api/users/:userId", (req, res) => {
-//   const chosen = req.params.userId;
-//
-//   // console.log(chosen);
-//
-//   /* Check each character routeName and see if the same as "chosen"
-//   If the statement is true, send the character back as JSON,
-//   otherwise tell the user no character was found */
-//
-//   for (let i = 0; i < users.length; i++) {
-//     if (chosen == users[i].id) {
-//       return res.json(users[i]);
+// app.get("/test", (req, res) => {
+//   exec("ls /etc/pki/vswitch", (error, stdout, stderr) => {
+//     if (error) {
+//       res.sendStatus(500);
+//       console.error(`test error: ${error.message}`);
+//       return;
 //     }
-//   }
 //
-//   return res.json(false);
+//     if (stderr) {
+//       res.sendStatus(500);
+//       console.error(`test stderr:\n${stderr}`);
+//       return;
+//     }
+//
+//     res.sendStatus(200);
+//     console.log(`test stdout:\n${stdout}`);
+//   });
 // });
+
+app.get("/ca", (req, res) => {
+  // TODO: Add logic for user auth and database
+  exec("sh scripts/gen_ca.sh vswitch", (error, stdout, stderr) => {
+    if (error) {
+      res.sendStatus(500);
+      console.error(`ca error: ${error.message}`);
+      return;
+    }
+    res.sendStatus(200);
+    // build-ca command outputs to stderr
+    console.error(`ca stderr:\n${stderr}`);
+    console.log(`ca stdout:\n${stdout}`);
+  });
+});
 
 // Create a new user
 app.post("/users", (req, res) => {
@@ -107,37 +106,5 @@ app.post("/users", (req, res) => {
     });
 });
 
-// Update a user's info
-// app.put("/api/users", (req, res) => {
-//   const updatedUser = req.body;
-//   for (let i = 0; i < users.length; i++) {
-//     if (
-//       users[i].id == updatedUser.id &&
-//       users[i].userName === updatedUser.userName
-//     ) {
-//       users[i].password = updatedUser.password;
-//       users[i].email = updatedUser.email;
-//       users[i].org = updatedUser.org;
-//       return res.json(updatedUser);
-//     }
-//   }
-//   return res.json(false);
-// });
-
-// Delete a user
-// app.delete("/api/users", (req, res) => {
-//   const deletedUser = req.body;
-//   for (let i = 0; i < users.length; i++) {
-//     if (
-//       users[i].id == deletedUser.id &&
-//       users[i].userName === deletedUser.userName
-//     ) {
-//       delete users[i];
-//       return res.json(deletedUser);
-//     }
-//   }
-//   return res.json(false);
-// });
-
-// Starts the server to begin listening
+// Start the server
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`));
