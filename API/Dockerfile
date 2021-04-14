@@ -14,15 +14,19 @@ EXPOSE 8000
 
 # Production stage
 FROM base as production
+
 ENV NODE_ENV=production
 # Build code for production (without devDependencies)
 RUN npm ci --only=production
 COPY . .
+
 ENTRYPOINT [ "node", "server.js" ]
 
 # Development stage
 FROM base as dev
+
 ENV NODE_ENV=development
 # Build code for development
 RUN npm install -g nodemon && npm install
+
 ENTRYPOINT [ "nodemon", "server.js" ]
