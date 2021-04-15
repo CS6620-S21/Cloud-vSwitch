@@ -3,6 +3,7 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 const admin = require("firebase-admin");
 const { exec } = require("child_process");
 
@@ -74,8 +75,9 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 //   });
 // });
 
+// Generate CA
 app.get("/ca", (req, res) => {
-  // TODO: Add logic for user auth and database
+  // TODO: Add logic for auth and database
   const cn = "vswitch";
 
   exec(`sh scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
@@ -90,10 +92,74 @@ app.get("/ca", (req, res) => {
     console.log(`CA build stdout:\n${stdout}`);
 
     // Send generated CA cert
-    res.sendFile(`/etc/pki/${cn}/ca.crt`, (err) => {
+    res.download(`/etc/pki/${cn}/ca.crt`, "ca.crt", (err) => {
       if (err) {
         res.sendStatus(500);
         console.error(`CA send error: ${err.message}`);
+      }
+    });
+  });
+});
+
+// Sign the certificate request from a server/client
+// POST body: { data: "base64 encoded string of the certificate request" }
+app.post("/cert-req", (req, res) => {
+  // TODO: Add logic for auth and database
+  const cn = "vswitch";
+  const type = "server";
+  const name = "server0";
+
+  const { data } = req.body;
+  if (!data) {
+    res.status(400).send("Missing certificate request data");
+    return;
+  }
+
+  // Save cert req as file and sign it
+  const reqPath = `/tmp/${name}.req`;
+  fs.writeFile(reqPath, data, (err) => {
+    if (err) {
+      res.sendStatus(500);
+      console.error(`Cert req: read error: ${err.message}`);
+      return;
+    }
+
+    exec(
+      `sh scripts/sign_cert.sh ${cn} ${type} ${reqPath} ${name}`,
+      (error, stdout, stderr) => {
+        if (error) {
+          res.sendStatus(500);
+          console.error(`Cert req: sign error: ${error.message}`);
+          return;
+        }
+        res.sendStatus(200);
+
+        // sign-req command outputs to stderr
+        console.error(`Cert req: sign stderr:\n${stderr}`);
+        console.log(`Cert req: sign stdout:\n${stdout}`);
+      }
+    );
+  });
+});
+
+// Get the signed certificate for a server/client
+app.get("/cert", (req, res) => {
+  // TODO: Add logic for auth and database
+  const cn = "vswitch";
+  const type = "server";
+  const certName = "server0";
+  const certPath = `/etc/pki/${cn}/issued/${certName}.crt`;
+
+  // Send cert if exists
+  fs.access(certPath, (err) => {
+    if (err) {
+      res.status(404).send("No cert");
+      return;
+    }
+    res.download(certPath, `${type}.crt`, (err) => {
+      if (err) {
+        res.sendStatus(500);
+        console.error(`Cert send error: ${err.message}`);
       }
     });
   });
