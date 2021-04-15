@@ -76,42 +76,54 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 // });
 
 // Generate CA
-app.get("/ca", (req, res) => {
+// POST body: { cn: "common-name" }
+// Does not return CA in response
+app.post("/ca", (req, res) => {
   // TODO: Add logic for auth and database
-  const cn = "vswitch";
+  const { cn } = req.body;
   const caPath = `/etc/pki/${cn}/ca.crt`;
 
-  const sendCA = () => {
-    res.download(caPath, "ca.crt", (err) => {
-      if (err) {
-        res.sendStatus(500);
-        console.error(`CA send error: ${err.message}`);
-      }
-    });
-  };
-
   fs.access(caPath, (err) => {
-    // Send CA if exists
+    // Do not generate CA if exists
     if (!err) {
-      sendCA();
+      res.status(409).send(`CA for ${cn} already exists`);
       return;
     }
 
-    // Generate and send new CA if not exists
+    // Generate CA if not exists
     exec(`sh scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
       if (error) {
         res.sendStatus(500);
         console.error(`CA build exec error: ${error.message}`);
         return;
       }
+      res.sendStatus(201);
 
       // build-ca command outputs to stderr
       console.error(`CA build stderr:\n${stderr}`);
       console.log(`CA build stdout:\n${stdout}`);
-
-      // Send generated CA cert
-      sendCA();
     });
+  });
+});
+
+// Get CA
+app.get("/ca", (req, res) => {
+  // TODO: Add logic for auth and database
+  const cn = "vswitch";
+  const caPath = `/etc/pki/${cn}/ca.crt`;
+
+  fs.access(caPath, (err) => {
+    // Send CA if exists
+    if (!err) {
+      res.download(caPath, "ca.crt", (err) => {
+        if (err) {
+          res.sendStatus(500);
+          console.error(`CA send error: ${err.message}`);
+        }
+      });
+    } else {
+      res.status(404).send(`No CA for ${cn}`);
+    }
   });
 });
 
@@ -146,7 +158,7 @@ app.post("/cert-req", (req, res) => {
           console.error(`Cert req: sign error: ${error.message}`);
           return;
         }
-        res.sendStatus(200);
+        res.sendStatus(201);
 
         // sign-req command outputs to stderr
         console.error(`Cert req: sign stderr:\n${stderr}`);
@@ -194,7 +206,7 @@ app.post("/users", (req, res) => {
       password,
       displayName,
     })
-    .then(() => res.sendStatus(200))
+    .then(() => res.sendStatus(201))
     .catch((error) => {
       console.log("Error creating new user:", error);
       res.status(500).send(error.errorInfo.message);
