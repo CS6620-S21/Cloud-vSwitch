@@ -79,24 +79,38 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 app.get("/ca", (req, res) => {
   // TODO: Add logic for auth and database
   const cn = "vswitch";
+  const caPath = `/etc/pki/${cn}/ca.crt`;
 
-  exec(`sh scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
-    if (error) {
-      res.sendStatus(500);
-      console.error(`CA build exec error: ${error.message}`);
-      return;
-    }
-
-    // build-ca command outputs to stderr
-    console.error(`CA build stderr:\n${stderr}`);
-    console.log(`CA build stdout:\n${stdout}`);
-
-    // Send generated CA cert
-    res.download(`/etc/pki/${cn}/ca.crt`, "ca.crt", (err) => {
+  const sendCA = () => {
+    res.download(caPath, "ca.crt", (err) => {
       if (err) {
         res.sendStatus(500);
         console.error(`CA send error: ${err.message}`);
       }
+    });
+  };
+
+  fs.access(caPath, (err) => {
+    // Send CA if exists
+    if (!err) {
+      sendCA();
+      return;
+    }
+
+    // Generate and send new CA if not exists
+    exec(`sh scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
+      if (error) {
+        res.sendStatus(500);
+        console.error(`CA build exec error: ${error.message}`);
+        return;
+      }
+
+      // build-ca command outputs to stderr
+      console.error(`CA build stderr:\n${stderr}`);
+      console.log(`CA build stdout:\n${stdout}`);
+
+      // Send generated CA cert
+      sendCA();
     });
   });
 });
