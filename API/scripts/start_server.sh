@@ -20,6 +20,6 @@ set_var EASYRSA_BATCH 1
 EOL
 
 # Load environment variables required by express server from .env file
-export "$(grep -v '^#' .env | xargs)"
+export "$(grep -v '^#' ../.env | xargs)"
 # Start express server in production mode
 pm2 start ../server.js --name vswitch-api
