@@ -1,6 +1,10 @@
 #!/bin/sh
 # Script to set up and start express server
-# Run as non-root user
+# Check if script is run as non-root user
+if [ "$USER" = root ]; then
+  echo "Please run as non-root user"
+  exit 1
+fi
 
 # Set required environment variables
 . ./.env
@@ -18,4 +22,5 @@ EOL
 
 # Start express server (redirect port to 80 on Linux)
 sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port "$PORT"
+echo "Redirect port: $PORT -> 80"
 npm start
