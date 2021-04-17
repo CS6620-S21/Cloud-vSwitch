@@ -122,15 +122,11 @@ app.get("/ca/:cn", (req, res) => {
 // :cn is common name for the organization
 // :type is either "server" or "client"
 // :id is a unique id for the certificate
-// Request body: { "data": "base64 encoded string of the certificate request" }
-app.post("/cert/:cn/:type/:id", (req, res) => {
+// Request body: .req file for certificate sign request
+app.post("/cert/:cn/:type/:id", express.text("req"), (req, res) => {
   // TODO: Add logic for auth and database
-  if (!req.is("application/json") || !req.body.data) {
-    res
-      .status(400)
-      .send(
-        "Bad Request: expected request body is { 'data': 'base64 encoded string of the certificate request' }"
-      );
+  if (!req.is("text/plain") || !req.body) {
+    res.status(400).send("Bad Request: expected request body is .req file");
     return;
   }
 
@@ -142,7 +138,7 @@ app.post("/cert/:cn/:type/:id", (req, res) => {
     return;
   }
 
-  const { data } = req.body;
+  const data = req.body;
   const certName = type + id;
   const reqPath = `/tmp/${certName}.req`;
 
