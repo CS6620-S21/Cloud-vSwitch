@@ -17,5 +17,5 @@ set_var EASYRSA_BATCH 1
 EOL
 
 # Start express server (redirect port to 80 on Linux)
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port "$PORT"
+sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port "$PORT"
 npm start
