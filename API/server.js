@@ -12,16 +12,6 @@ if (process.env.NODE_ENV === "production") {
   console.log = function () {};
 }
 
-// Config easy-rsa
-exec("sh scripts/easyrsa_vars.sh", (error, stdout, stderr) => {
-  if (error) {
-    console.error(`easyrsa_vars error: ${error.message}`);
-  }
-  if (stderr) {
-    console.error(`easyrsa_vars stderr:\n${stderr}`);
-  }
-});
-
 // Set up Firebase
 admin.initializeApp({
   credential: admin.credential.cert({

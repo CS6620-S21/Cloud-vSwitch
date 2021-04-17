@@ -1,4 +1,0 @@
-applications:
-  - name: Cloud_vSwitch_API
-    host: vswitch-api
-    memory: 128M
