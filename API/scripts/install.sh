@@ -1,5 +1,6 @@
 #!/bin/sh
 # Script to install server dependencies on CentOS
+# Run script as non-root user
 sudo yum -y install openssl
 
 mkdir "$HOME"/easy-rsa

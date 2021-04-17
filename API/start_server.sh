@@ -2,7 +2,7 @@
 # Script to set up and start express server
 
 # Set required environment variables
-. .env
+. ./.env
 
 # Config easy-rsa parameters
 # Elliptic curve cryptography provides more security and eliminates
