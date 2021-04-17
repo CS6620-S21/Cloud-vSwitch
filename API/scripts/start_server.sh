@@ -5,8 +5,6 @@
 export EASYRSA=$HOME/easy-rsa
 # Set path to PKI directory where easy-rsa manages certificates
 export EASYRSA_PKI=$EASYRSA/pki
-# Copy easy-rsa to the directory
-cp -r /usr/share/easy-rsa/3.0.8 "$EASYRSA"
 
 # Config easy-rsa parameters
 # Elliptic curve cryptography provides more security and eliminates
