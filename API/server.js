@@ -106,7 +106,7 @@ app.get("/ca/:cn", (req, res) => {
   // TODO: Add logic for auth and database
   const { cn } = req.params;
   if (!cn) {
-    req.status(400).send("Bad Request: expected route is /ca/:cn");
+    res.status(400).send("Bad Request: expected route is /ca/:cn");
     return;
   }
   const caPath = `${process.env.EASYRSA_PKI}/${cn}/ca.crt`;
@@ -129,8 +129,9 @@ app.get("/ca/:cn", (req, res) => {
 // Sign the certificate request from a server/client
 // :cn is common name for the organization
 // :type is either "server" or "client"
+// :id is a unique id for the certificate
 // Request body: { "data": "base64 encoded string of the certificate request" }
-app.post("/cert/:cn/:type", (req, res) => {
+app.post("/cert/:cn/:type/:id", (req, res) => {
   // TODO: Add logic for auth and database
   if (!req.is("application/json") || !req.body.data) {
     res
@@ -141,9 +142,9 @@ app.post("/cert/:cn/:type", (req, res) => {
     return;
   }
 
-  const { cn, type } = req.params;
-  if (!cn || !type) {
-    req.status(400).send("Bad Request: expected route is /ca/:cn/:type");
+  const { cn, type, id } = req.params;
+  if (!cn || !type || !id) {
+    res.status(400).send("Bad Request: expected route is /ca/:cn/:type/:id");
     return;
   }
   if (type !== "server" && type !== "client") {
@@ -154,8 +155,8 @@ app.post("/cert/:cn/:type", (req, res) => {
   }
 
   const { data } = req.body;
-  const name = "server0";
-  const reqPath = `/tmp/${name}.req`;
+  const certName = type + id;
+  const reqPath = `/tmp/${certName}.req`;
 
   // Save cert req as file and sign it
   fs.writeFile(reqPath, data, (err) => {
@@ -166,7 +167,7 @@ app.post("/cert/:cn/:type", (req, res) => {
     }
 
     exec(
-      `sh scripts/sign_cert.sh ${cn} ${type} ${reqPath} ${name}`,
+      `sh scripts/sign_cert.sh ${cn} ${type} ${reqPath} ${certName}`,
       (error, stdout, stderr) => {
         if (error) {
           res.sendStatus(500);
@@ -186,11 +187,12 @@ app.post("/cert/:cn/:type", (req, res) => {
 // Get the signed certificate for a server/client
 // :cn is common name for the server's/client's organization
 // :type is either "server" or "client"
-app.get("/cert/:cn/:type", (req, res) => {
+// :id is certificate id
+app.get("/cert/:cn/:type/:id", (req, res) => {
   // TODO: Add logic for auth and database
-  const { cn, type } = req.params;
-  if (!cn || !type) {
-    req.status(400).send("Bad Request: expected route is /ca/:cn/:type");
+  const { cn, type, id } = req.params;
+  if (!cn || !type || !id) {
+    res.status(400).send("Bad Request: expected route is /ca/:cn/:type/:id");
     return;
   }
   if (type !== "server" && type !== "client") {
@@ -200,7 +202,7 @@ app.get("/cert/:cn/:type", (req, res) => {
     return;
   }
 
-  const certName = "server0";
+  const certName = type + id;
   const certPath = `${process.env.EASYRSA_PKI}/${cn}/issued/${certName}.crt`;
 
   // Send cert if exists
