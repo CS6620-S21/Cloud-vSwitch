@@ -71,7 +71,7 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 app.post("/ca", (req, res) => {
   // TODO: Add logic for auth and database
   const { cn } = req.body;
-  const caPath = `/etc/pki/${cn}/ca.crt`;
+  const caPath = `${process.env.EASYRSA_PKI}/${cn}/ca.crt`;
 
   fs.access(caPath, (err) => {
     // Do not generate CA if exists
@@ -100,7 +100,7 @@ app.post("/ca", (req, res) => {
 app.get("/ca", (req, res) => {
   // TODO: Add logic for auth and database
   const cn = "vswitch";
-  const caPath = `/etc/pki/${cn}/ca.crt`;
+  const caPath = `${process.env.EASYRSA_PKI}/${cn}/ca.crt`;
 
   fs.access(caPath, (err) => {
     // Send CA if exists
@@ -119,7 +119,7 @@ app.get("/ca", (req, res) => {
 
 // Sign the certificate request from a server/client
 // POST body: { data: "base64 encoded string of the certificate request" }
-app.post("/cert-req", (req, res) => {
+app.post("/cert", (req, res) => {
   // TODO: Add logic for auth and database
   const cn = "vswitch";
   const type = "server";
@@ -164,7 +164,7 @@ app.get("/cert", (req, res) => {
   const cn = "vswitch";
   const type = "server";
   const certName = "server0";
-  const certPath = `/etc/pki/${cn}/issued/${certName}.crt`;
+  const certPath = `${process.env.EASYRSA_PKI}/${cn}/issued/${certName}.crt`;
 
   // Send cert if exists
   fs.access(certPath, (err) => {
