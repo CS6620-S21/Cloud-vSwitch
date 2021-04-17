@@ -65,12 +65,16 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 //   });
 // });
 
-// Generate CA
-// POST body: { cn: "common-name" }
-// Does not return CA in response
-app.post("/ca", (req, res) => {
+// Generate CA for an organization
+// :cn is common name for the organization
+// Does not require request body or return CA in response
+app.post("/ca/:cn", (req, res) => {
   // TODO: Add logic for auth and database
-  const { cn } = req.body;
+  const { cn } = req.params;
+  if (!cn) {
+    res.status(400).send("Bad Request: expected route is /ca/:cn");
+    return;
+  }
   const caPath = `${process.env.EASYRSA_PKI}/${cn}/ca.crt`;
 
   fs.access(caPath, (err) => {
@@ -96,10 +100,15 @@ app.post("/ca", (req, res) => {
   });
 });
 
-// Get CA
-app.get("/ca", (req, res) => {
+// Get CA for an organization
+// :cn is common name for the organization
+app.get("/ca/:cn", (req, res) => {
   // TODO: Add logic for auth and database
-  const cn = "vswitch";
+  const { cn } = req.params;
+  if (!cn) {
+    req.status(400).send("Bad Request: expected route is /ca/:cn");
+    return;
+  }
   const caPath = `${process.env.EASYRSA_PKI}/${cn}/ca.crt`;
 
   fs.access(caPath, (err) => {
@@ -118,21 +127,37 @@ app.get("/ca", (req, res) => {
 });
 
 // Sign the certificate request from a server/client
-// POST body: { data: "base64 encoded string of the certificate request" }
-app.post("/cert", (req, res) => {
+// :cn is common name for the organization
+// :type is either "server" or "client"
+// Request body: { "data": "base64 encoded string of the certificate request" }
+app.post("/cert/:cn/:type", (req, res) => {
   // TODO: Add logic for auth and database
-  const cn = "vswitch";
-  const type = "server";
-  const name = "server0";
-
-  const { data } = req.body;
-  if (!data) {
-    res.status(400).send("Missing certificate request data");
+  if (!req.is("application/json") || !req.body.data) {
+    res
+      .status(400)
+      .send(
+        "Bad Request: expected request body is { 'data': 'base64 encoded string of the certificate request' }"
+      );
     return;
   }
 
-  // Save cert req as file and sign it
+  const { cn, type } = req.params;
+  if (!cn || !type) {
+    req.status(400).send("Bad Request: expected route is /ca/:cn/:type");
+    return;
+  }
+  if (type !== "server" && type !== "client") {
+    res
+      .status(400)
+      .send("Bad Request: 'type' should be either 'server' or 'client'");
+    return;
+  }
+
+  const { data } = req.body;
+  const name = "server0";
   const reqPath = `/tmp/${name}.req`;
+
+  // Save cert req as file and sign it
   fs.writeFile(reqPath, data, (err) => {
     if (err) {
       res.sendStatus(500);
@@ -159,10 +184,22 @@ app.post("/cert", (req, res) => {
 });
 
 // Get the signed certificate for a server/client
-app.get("/cert", (req, res) => {
+// :cn is common name for the server's/client's organization
+// :type is either "server" or "client"
+app.get("/cert/:cn/:type", (req, res) => {
   // TODO: Add logic for auth and database
-  const cn = "vswitch";
-  const type = "server";
+  const { cn, type } = req.params;
+  if (!cn || !type) {
+    req.status(400).send("Bad Request: expected route is /ca/:cn/:type");
+    return;
+  }
+  if (type !== "server" && type !== "client") {
+    res
+      .status(400)
+      .send("Bad Request: 'type' should be either 'server' or 'client'");
+    return;
+  }
+
   const certName = "server0";
   const certPath = `${process.env.EASYRSA_PKI}/${cn}/issued/${certName}.crt`;
 
@@ -183,11 +220,20 @@ app.get("/cert", (req, res) => {
 
 // Create a new user
 app.post("/users", (req, res) => {
-  const { email, password, displayName } = req.body;
-
-  if (!email || !password || !displayName) {
-    res.sendStatus(400);
+  if (
+    !req.is("application/json") ||
+    !req.body.email ||
+    !req.body.password ||
+    !req.body.displayName
+  ) {
+    res
+      .status(400)
+      .send(
+        "Bad Request: expected request body is { 'email': 'my@example.com', 'password': 'xxx', 'displayName': 'First Last' }"
+      );
+    return;
   }
+  const { email, password, displayName } = req.body;
 
   admin
     .auth()
