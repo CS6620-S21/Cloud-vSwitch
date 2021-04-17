@@ -13,6 +13,7 @@ pki=$EASYRSA_PKI/$1
 
 # Config env var for easy-rsa
 export EASYRSA_PKI=$pki
+export EASYRSA_REQ_CN=$1
 
 # Import sign req if signed certificate does not exist
 if [ ! -f "$pki/issued/$4.crt" ]; then
@@ -29,3 +30,4 @@ fi
 # Clean up
 rm -f "$3"
 unset EASYRSA_PKI
+unset EASYRSA_REQ_CN
