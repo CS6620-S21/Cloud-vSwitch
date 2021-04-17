@@ -71,10 +71,6 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 app.post("/ca/:cn", (req, res) => {
   // TODO: Add logic for auth and database
   const { cn } = req.params;
-  if (!cn) {
-    res.status(400).send("Bad Request: expected route is /ca/:cn");
-    return;
-  }
   const caPath = `${process.env.EASYRSA_PKI}/${cn}/ca.crt`;
 
   fs.access(caPath, (err) => {
@@ -105,10 +101,6 @@ app.post("/ca/:cn", (req, res) => {
 app.get("/ca/:cn", (req, res) => {
   // TODO: Add logic for auth and database
   const { cn } = req.params;
-  if (!cn) {
-    res.status(400).send("Bad Request: expected route is /ca/:cn");
-    return;
-  }
   const caPath = `${process.env.EASYRSA_PKI}/${cn}/ca.crt`;
 
   fs.access(caPath, (err) => {
@@ -143,10 +135,6 @@ app.post("/cert/:cn/:type/:id", (req, res) => {
   }
 
   const { cn, type, id } = req.params;
-  if (!cn || !type || !id) {
-    res.status(400).send("Bad Request: expected route is /ca/:cn/:type/:id");
-    return;
-  }
   if (type !== "server" && type !== "client") {
     res
       .status(400)
@@ -191,10 +179,6 @@ app.post("/cert/:cn/:type/:id", (req, res) => {
 app.get("/cert/:cn/:type/:id", (req, res) => {
   // TODO: Add logic for auth and database
   const { cn, type, id } = req.params;
-  if (!cn || !type || !id) {
-    res.status(400).send("Bad Request: expected route is /ca/:cn/:type/:id");
-    return;
-  }
   if (type !== "server" && type !== "client") {
     res
       .status(400)
