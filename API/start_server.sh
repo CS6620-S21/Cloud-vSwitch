@@ -1,5 +1,6 @@
 #!/bin/sh
 # Script to set up and start express server
+# Run as non-root user
 
 # Set required environment variables
 . ./.env
@@ -15,5 +16,6 @@ set_var EASYRSA_NS_SUPPORT "yes"
 set_var EASYRSA_BATCH 1
 EOL
 
-# Start express server
+# Start express server (redirect port to 80 on Linux)
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port "$PORT"
 npm start
