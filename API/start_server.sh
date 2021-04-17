@@ -1,10 +1,8 @@
 #!/bin/sh
 # Script to set up and start express server
 
-# Set path to easy-rsa directory
-export EASYRSA=$HOME/easy-rsa
-# Set path to PKI directory where easy-rsa manages certificates
-export EASYRSA_PKI=$EASYRSA/pki
+# Set required environment variables
+. .env
 
 # Config easy-rsa parameters
 # Elliptic curve cryptography provides more security and eliminates
@@ -17,7 +15,5 @@ set_var EASYRSA_NS_SUPPORT "yes"
 set_var EASYRSA_BATCH 1
 EOL
 
-# Load environment variables required by express server from .env file
-export "$(grep -v '^#' ../.env | xargs)"
-# Start express server in production mode
-pm2 start ../server.js --name vswitch-api
+# Start express server
+npm start

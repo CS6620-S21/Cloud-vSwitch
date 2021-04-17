@@ -15,7 +15,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon -r dotenv/config server.js dotenv_config_path=.env",
+    "dev": "nodemon server.js",
+    "prod": "pm2 start server.js --name vswitch-api",
     "lint": "eslint --cache *.js && prettier --write *.js"
   },
   "author": "",
