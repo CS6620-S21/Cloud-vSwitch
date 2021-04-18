@@ -1,9 +1,10 @@
 #!/bin/bash
 # Script to create OpenVPN server configuration
 # Make sure openvpn is installed before running this script
+# Usage: ./server_config.sh [common name] [server id]
 
-CN="test-server"
-SERVER_ID="123"
+CN=$1
+SERVER_ID=$2
 API_URL=http://localhost:8000
 
 # Check if openvpn and easy-rsa is in PATH
@@ -13,9 +14,12 @@ if ! command -v openvpn; then
 fi
 export PATH=/etc/openvpn/easy-rsa/easyrsa3:$PATH
 
-# Generate CA
+# Generate CA or get if exists
 API_URL_CA=$API_URL/ca/$CN
-curl -X POST $API_URL_CA && curl -o /tmp/ca.crt $API_URL_CA
+curl -o /tmp/ca.crt "$API_URL_CA"
+if [ ! -f /tmp/ca.crt ]; then
+  curl -X POST "$API_URL_CA" && curl -o /tmp/ca.crt "$API_URL_CA"
+fi
 sudo mv /tmp/ca.crt /etc/openvpn/server/
 sudo chown root:root /etc/openvpn/server/ca.crt
 
@@ -27,7 +31,12 @@ sudo cp /tmp/pki/private/server.key /etc/openvpn/server/
 
 # Sign server certificate
 API_URL_CERT=$API_URL/cert/$CN/server/$SERVER_ID
-curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/pki/reqs/server.req" $API_URL_CERT && curl -o /tmp/server.crt $API_URL_CERT
+curl -o /tmp/server.crt "$API_URL_CERT"
+if [ -f /tmp/server.crt ]; then
+  echo "Server id already in use"
+  exit 1
+fi
+curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/pki/reqs/server.req" "$API_URL_CERT" && curl -o /tmp/server.crt "$API_URL_CERT"
 sudo mv /tmp/server.crt /etc/openvpn/server/
 sudo chown root:root /etc/openvpn/server/server.crt
 
