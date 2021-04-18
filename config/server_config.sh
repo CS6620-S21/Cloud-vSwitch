@@ -1,34 +1,44 @@
 #!/bin/bash
 # Script to create OpenVPN server configuration
+# Make sure openvpn is installed before running this script
 
-# start easy-rsa
-cd /etc/openvpn/easy-rsa
+CN="test-server"
+SERVER_ID="123"
+API_URL=http://localhost:8000
 
-# init PKI
-sudo ./easyrsa init-pki
+# Check if openvpn and easy-rsa is in PATH
+if ! command -v openvpn; then
+  echo "openvpn not found"
+  exit 1
+fi
+export PATH=/etc/openvpn/easy-rsa/easyrsa3:$PATH
 
-# build CA
-sudo ./easyrsa build-ca
+# Generate CA
+API_URL_CA=$API_URL/ca/$CN
+curl -X POST $API_URL_CA && curl -o /tmp/ca.crt $API_URL_CA
+sudo mv /tmp/ca.crt /etc/openvpn/server/
+sudo chown root:root /etc/openvpn/server/ca.crt
 
-# create Diffie-Hellman key
-sudo ./easyrsa gen-dh
+# Generate server certificate and key
+rm -rf /tmp/pki
+EASYRSA_PKI=/tmp/pki easyrsa init-pki
+EASYRSA_PKI=/tmp/pki easyrsa --batch gen-req server nopass
+sudo cp /tmp/pki/private/server.key /etc/openvpn/server/
 
-# generate certificate request
-sudo ./easyrsa gen-req server
+# Sign server certificate
+API_URL_CERT=$API_URL/cert/$CN/server/$SERVER_ID
+curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/pki/reqs/server.req" $API_URL_CERT && curl -o /tmp/server.crt $API_URL_CERT
+sudo mv /tmp/server.crt /etc/openvpn/server/
+sudo chown root:root /etc/openvpn/server/server.crt
 
-# sign request
-sudo ./easyrsa sign-req server server
+# Clean up
+rm -rf /tmp/pki /tmp/*.crt
 
-# generate ta.key
-cd /etc/openvpn
-sudo openvpn --genkey --secret ta.key
-sudo mv /etc/openvpn/ta.key /etc/openvpn/easy-rsa/private/ta.key
-
-# OpenVPN server config
-sudo cp /usr/share/doc/openvpn-2.4.10/sample/sample-config-files/server.conf /etc/openvpn/
+# Generate HMAC key
+sudo openvpn --genkey --secret /etc/openvpn/server/ta.key
 
 # OpenVPN server configuration file
-cat > /etc/openvpn/server.conf << EOL
+sudo bash -c 'cat > /etc/openvpn/server.conf << EOL
 # OpenVPN server configuration file
 port 443
 proto tcp
@@ -39,15 +49,16 @@ keepalive 10 120
 persist-key
 persist-tun
 verb 3
-dh /etc/openvpn/easy-rsa/pki/dh.pem
-ca ca.crt
-cert server.crt
-key server.key
-tls-auth ta.key 0
-EOL
+dh none
+ca /etc/openvpn/server/ca.crt
+cert /etc/openvpn/server/server.crt
+key /etc/openvpn/server/server.key
+tls-auth /etc/openvpn/server/ta.key 0
+EOL'
 
-# start OpenVPN server
+# Start OpenVPN server in debug mode
 sudo openvpn /etc/openvpn/server.conf
 
-
-
+# Config and run OpenVPN as system service
+# sudo systemctl -f enable openvpn@server.service
+# sudo systemctl start openvpn@server.service
