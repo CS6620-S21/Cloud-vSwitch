@@ -22,10 +22,10 @@ export PATH=/etc/openvpn/easy-rsa/easyrsa3:$PATH
 
 # Generate CA or get if exists
 API_URL_CA=$API_URL/ca/$CN
-curl -o /tmp/ca.crt "$API_URL_CA"
-if [ ! -f /tmp/ca.crt ]; then
-  curl -X POST "$API_URL_CA" && curl -o /tmp/ca.crt "$API_URL_CA"
+if [ $(curl --write-out "%{http_code}" --silent -o /dev/null "$API_URL_CA") = 404 ]; then
+  curl -X POST "$API_URL_CA"
 fi
+curl -o /tmp/ca.crt "$API_URL_CA"
 sudo mv /tmp/ca.crt /etc/openvpn/server/
 sudo chown root:root /etc/openvpn/server/ca.crt
 
@@ -37,8 +37,7 @@ sudo cp /tmp/pki/private/server.key /etc/openvpn/server/
 
 # Sign server certificate
 API_URL_CERT=$API_URL/cert/$CN/server/$SERVER_ID
-curl -o /tmp/server.crt "$API_URL_CERT"
-if [ -f /tmp/server.crt ]; then
+if [ $(curl --write-out "%{http_code}" --silent -o /dev/null "$API_URL_CERT") = 200 ]; then
   echo "Server id already in use"
   exit 1
 fi
