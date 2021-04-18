@@ -3,6 +3,12 @@
 # Make sure openvpn is installed before running this script
 # Usage: ./server_config.sh [common name] [server id]
 
+# Check arguments
+if [ $# -ne 2 ]; then
+  echo "Usage: ./server_config.sh [common name] [server id]"
+  exit 1
+fi
+
 CN=$1
 SERVER_ID=$2
 API_URL=http://localhost:8000
