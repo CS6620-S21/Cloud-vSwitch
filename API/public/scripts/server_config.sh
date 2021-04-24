@@ -45,11 +45,13 @@ curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/pki/reqs/server.
 sudo mv /tmp/server.crt /etc/openvpn/server/
 sudo chown root:root /etc/openvpn/server/server.crt
 
-# Clean up
-rm -rf /tmp/pki /tmp/*.crt
-
 # Generate HMAC key
-sudo openvpn --genkey --secret /etc/openvpn/server/ta.key
+openvpn --genkey --secret /tmp/ta.key
+curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/ta.key" "$API_URL"/ta/"$CN"
+sudo cp /tmp/ta.key /etc/openvpn/server/ta.key
+
+# Clean up
+rm -rf /tmp/pki /tmp/*.crt /tmp/ta.key
 
 # OpenVPN server configuration file
 sudo bash -c 'cat > /etc/openvpn/server.conf << EOL
