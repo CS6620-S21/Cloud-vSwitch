@@ -51,7 +51,8 @@ curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/ta.key" "$API_UR
 sudo cp /tmp/ta.key /etc/openvpn/server/ta.key
 
 # Clean up
-sudo rm -f /tmp/pki /tmp/*.crt /tmp/ta.key
+rm -rf /tmp/pki /tmp/*.crt
+sudo rm -f /tmp/ta.key
 
 # OpenVPN server configuration file
 sudo bash -c 'cat > /etc/openvpn/server.conf << EOL
