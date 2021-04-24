@@ -54,8 +54,12 @@ sudo openvpn --genkey --secret /etc/openvpn/server/ta.key
 # OpenVPN server configuration file
 sudo bash -c 'cat > /etc/openvpn/server.conf << EOL
 # OpenVPN server configuration file
+mode server
+tls-server
+syslog openvpn
+verb 11
 port 443
-proto tcp
+proto tcp-server
 dev tap
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
@@ -63,11 +67,14 @@ keepalive 10 120
 persist-key
 persist-tun
 verb 3
-dh none
+dh /etc/openvpn/server/dh.pem
 ca /etc/openvpn/server/ca.crt
 cert /etc/openvpn/server/server.crt
 key /etc/openvpn/server/server.key
 tls-auth /etc/openvpn/server/ta.key 0
+cipher AES-256-CBC
+client-connect /etc/openvpn/server/connect-script
+script-security 2
 EOL'
 
 # Start OpenVPN server in debug mode
