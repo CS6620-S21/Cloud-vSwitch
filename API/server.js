@@ -69,8 +69,12 @@ app.post("/server-config", (req, res) => {
     `bash public/scripts/server_config.sh ${req.body.cn} ${req.body.id}`,
     (error, stdout, stderr) => {
       if (error) {
-        res.sendStatus(500);
         console.error(`Failed to run server_config.sh: ${error.message}`);
+        if (error.code === 2) {
+          res.status(500).send("Server id already in use");
+        } else {
+          res.sendStatus(500);
+        }
       } else {
         res.sendStatus(201);
         console.error(`server_config.sh stderr:\n${stderr}`);
