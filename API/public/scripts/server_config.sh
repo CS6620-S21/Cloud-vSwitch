@@ -37,10 +37,10 @@ sudo cp /tmp/pki/private/server.key /etc/openvpn/server/
 
 # Sign server certificate
 API_URL_CERT=$API_URL/cert/$CN/server/$SERVER_ID
-if [ $(curl --write-out "%{http_code}" --silent -o /dev/null "$API_URL_CERT") = 200 ]; then
-  echo "Server id already in use"
-  exit 1
-fi
+#if [ $(curl --write-out "%{http_code}" --silent -o /dev/null "$API_URL_CERT") = 200 ]; then
+#  echo "Server id already in use"
+#  exit 1
+#fi
 curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/pki/reqs/server.req" "$API_URL_CERT" && curl -o /tmp/server.crt "$API_URL_CERT"
 sudo mv /tmp/server.crt /etc/openvpn/server/
 sudo chown root:root /etc/openvpn/server/server.crt
