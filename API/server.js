@@ -59,7 +59,7 @@ app.post("/server-config", (req, res) => {
     res
       .status(400)
       .send(
-        'Bad Request: expected request body is { "cn": "org common name", "serverId": "unique server id" }'
+        'Bad Request: expected request body is { "cn": "org common name", "id": "unique server id" }'
       );
     return;
   }
