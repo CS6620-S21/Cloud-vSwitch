@@ -89,6 +89,7 @@ app.post("/ta/:cn", express.text("key"), (req, res) => {
   }
 
   // Save the key file
+  const { cn } = req.params;
   const keyPath = `${process.env.EASYRSA_PKI}/${cn}/private/ta.key`;
   fs.writeFile(keyPath, req.body, (err) => {
     if (err) {
@@ -137,7 +138,7 @@ app.post("/ca/:cn", (req, res) => {
     }
 
     // Generate CA if not exists
-    exec(`sh public/scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
+    exec(`sh scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
       if (error) {
         res.sendStatus(500);
         console.error(`CA build exec error: ${error.message}`);
@@ -207,7 +208,7 @@ app.post("/cert/:cn/:type/:id", express.text("req"), (req, res) => {
     }
 
     exec(
-      `sh public/scripts/sign_cert.sh ${cn} ${type} ${reqPath} ${certName}`,
+      `sh scripts/sign_cert.sh ${cn} ${type} ${reqPath} ${certName}`,
       (error, stdout, stderr) => {
         if (error) {
           res.sendStatus(500);
