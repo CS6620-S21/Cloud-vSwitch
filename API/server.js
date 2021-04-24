@@ -2,7 +2,6 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
-const path = require("path");
 const fs = require("fs");
 const admin = require("firebase-admin");
 const { exec } = require("child_process");
@@ -37,33 +36,14 @@ app.use(
   })
 );
 
+// Serve static files
+app.use(express.static("public"));
+
 // Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Routes
-
-// Basic route that sends the user first to the AJAX Page
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
-
-// app.get("/test", (req, res) => {
-//   exec("ls /etc/pki/vswitch", (error, stdout, stderr) => {
-//     if (error) {
-//       res.sendStatus(500);
-//       console.error(`test error: ${error.message}`);
-//       return;
-//     }
-//
-//     if (stderr) {
-//       res.sendStatus(500);
-//       console.error(`test stderr:\n${stderr}`);
-//       return;
-//     }
-//
-//     res.sendStatus(200);
-//     console.log(`test stdout:\n${stdout}`);
-//   });
-// });
 
 // Generate CA for an organization
 // :cn is common name for the organization
