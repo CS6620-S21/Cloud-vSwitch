@@ -45,6 +45,40 @@ app.use(express.json());
 
 // Routes
 
+// Generate required server side certificates and OpenVPN server config
+// Accepted body is { "cn": "org common name", "id": "unique server id" }
+// This runs the server config script directly because the API
+// and OpenVPN sever are on the same virtual machine currently
+app.post("/server-config", (req, res) => {
+  if (
+    !req.is("application/json") ||
+    !req.body ||
+    !req.body.cn ||
+    !req.body.id
+  ) {
+    res
+      .status(400)
+      .send(
+        'Bad Request: expected request body is { "cn": "org common name", "serverId": "unique server id" }'
+      );
+    return;
+  }
+
+  exec(
+    `bash public/scripts/server_config.sh ${req.body.cn} ${req.body.id}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        res.sendStatus(500);
+        console.error(`Failed to run server_config.sh: ${error.message}`);
+      } else {
+        res.sendStatus(201);
+        console.error(`server_config.sh stderr:\n${stderr}`);
+        console.log(`server_config.sh stdout:\n${stdout}`);
+      }
+    }
+  );
+});
+
 // Generate CA for an organization
 // :cn is common name for the organization
 // Does not require request body or return CA in response
