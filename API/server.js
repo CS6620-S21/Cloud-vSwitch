@@ -79,6 +79,48 @@ app.post("/server-config", (req, res) => {
   );
 });
 
+// Post HMAC key (ta.key) for an organization
+// Accepted body is a .key file
+// Need secure transfer in the future
+app.post("/ta/:cn", express.text("key"), (req, res) => {
+  if (!req.is("text/plain") || !req.body) {
+    res.status(400).send("Bad Request: expected request body is .key file");
+    return;
+  }
+
+  // Save the key file
+  const keyPath = `${process.env.EASYRSA_PKI}/${cn}/private/ta.key`;
+  fs.writeFile(keyPath, req.body, (err) => {
+    if (err) {
+      res.sendStatus(500);
+      console.error(`HMAC key: read error: ${err.message}`);
+    } else {
+      res.sendStatus(201);
+    }
+  });
+});
+
+// Get HMAC key (ta.key) for an organization
+// Need secure transfer in the future
+app.get("/ta/:cn", (req, res) => {
+  const { cn } = req.params;
+  const keyPath = `${process.env.EASYRSA_PKI}/${cn}/private/ta.key`;
+
+  fs.access(keyPath, (err) => {
+    // Send key if exists
+    if (!err) {
+      res.download(keyPath, "ta.key", (err) => {
+        if (err) {
+          res.sendStatus(500);
+          console.error(`HMAC key send error: ${err.message}`);
+        }
+      });
+    } else {
+      res.status(404).send(`No HMAC key for ${cn}`);
+    }
+  });
+});
+
 // Generate CA for an organization
 // :cn is common name for the organization
 // Does not require request body or return CA in response
