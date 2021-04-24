@@ -29,6 +29,7 @@ target=/usr/local/bin/easyrsa
 [ -f $target ] || ln -s /usr/share/easy-rsa/3.0.8/easyrsa $target
 
 # create the pki config for the client
+rm -rf ${PKI}
 ( cd /etc/openvpn || exit 1 ; easyrsa init-pki )
 
 # create the CA on the server - API call
@@ -44,6 +45,7 @@ curl -X POST -H "Content-Type: application/json" \
 curl --silent http://${server}/ca/${org} > $PKI/ca.crt
 # ta.key
 curl --silent http://${server}/ta/${org} > $PKI/ta.key
+chmod 600 $PKI/ta.key
 
 # create the CSR on the client
 ( cd /etc/openvpn ; easyrsa --batch gen-req vclient nopass )
@@ -58,7 +60,7 @@ curl --header 'Content-Type: text/plain' \
 # retrieve the Cert from the server API
 mkdir -p $PKI/issued
 URL=http://${server}/cert/${org}/client/${HOSTNAME}
-( cd $PKI/issued ; curl --silent $URL > vclient.cert )
+( cd $PKI/issued ; curl --silent $URL > vclient.crt )
 
 # create the client openvpn config file
 cat > /etc/openvpn/client.conf <<END
