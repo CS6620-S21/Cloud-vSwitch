@@ -1,5 +1,5 @@
 #!/bin/sh
-# Script to install server dependencies on CentOS
+# Script to install API server dependencies on CentOS
 # Run script as non-root user
 sudo yum -y install openssl
 

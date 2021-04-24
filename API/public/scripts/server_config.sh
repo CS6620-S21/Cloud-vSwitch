@@ -89,5 +89,5 @@ EOL'
 # sudo openvpn /etc/openvpn/server.conf
 
 # Config and run OpenVPN as system service
-sudo systemctl -f enable openvpn@server.service
-sudo systemctl start openvpn@server.service
+# sudo systemctl -f enable openvpn@server.service
+# sudo systemctl restart openvpn@server.service

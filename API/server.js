@@ -46,6 +46,44 @@ app.use(express.json());
 
 // Routes
 
+// Start OpenVPN server
+// Assume the API and OpenVPN sever are on the same virtual machine
+// TODO: support server id
+app.get("/start-server", (req, res) => {
+  exec(
+    "sudo systemctl start openvpn@server.service",
+    (error, stdout, stderr) => {
+      if (error) {
+        res.sendStatus(500);
+        console.error(`Failed to start OpenVPN server: ${error.message}`);
+      } else {
+        res.sendStatus(200);
+        console.error(`start OpenVPN server stderr:\n${stderr}`);
+        console.log(`start OpenVPN server stdout:\n${stdout}`);
+      }
+    }
+  );
+});
+
+// Stop OpenVPN server
+// Assume the API and OpenVPN sever are on the same virtual machine
+// TODO: support server id
+app.get("/stop-server", (req, res) => {
+  exec(
+    "sudo systemctl stop openvpn@server.service",
+    (error, stdout, stderr) => {
+      if (error) {
+        res.sendStatus(500);
+        console.error(`Failed to stop OpenVPN server: ${error.message}`);
+      } else {
+        res.sendStatus(200);
+        console.error(`stop OpenVPN server stderr:\n${stderr}`);
+        console.log(`stop OpenVPN server stdout:\n${stdout}`);
+      }
+    }
+  );
+});
+
 // Generate required server side certificates and OpenVPN server config
 // Accepted body is { "cn": "org common name", "id": "unique server id" }
 // This runs the server config script directly because the API
