@@ -3,6 +3,7 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const fs = require("fs");
+const path = require("path");
 const admin = require("firebase-admin");
 const { exec } = require("child_process");
 
@@ -37,7 +38,7 @@ app.use(
 );
 
 // Serve static files
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
