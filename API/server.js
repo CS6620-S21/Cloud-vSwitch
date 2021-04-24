@@ -137,7 +137,7 @@ app.post("/ca/:cn", (req, res) => {
     }
 
     // Generate CA if not exists
-    exec(`sh scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
+    exec(`sh public/scripts/gen_ca.sh ${cn}`, (error, stdout, stderr) => {
       if (error) {
         res.sendStatus(500);
         console.error(`CA build exec error: ${error.message}`);
@@ -207,7 +207,7 @@ app.post("/cert/:cn/:type/:id", express.text("req"), (req, res) => {
     }
 
     exec(
-      `sh scripts/sign_cert.sh ${cn} ${type} ${reqPath} ${certName}`,
+      `sh public/scripts/sign_cert.sh ${cn} ${type} ${reqPath} ${certName}`,
       (error, stdout, stderr) => {
         if (error) {
           res.sendStatus(500);
