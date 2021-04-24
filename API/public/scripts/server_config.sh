@@ -50,8 +50,13 @@ openvpn --genkey --secret /tmp/ta.key
 curl -X POST -H "Content-Type: text/plain" --data-binary "@/tmp/ta.key" "$API_URL"/ta/"$CN"
 sudo cp /tmp/ta.key /etc/openvpn/server/ta.key
 
+# Get bridge script
+curl $API_URL/scripts/connect-script > /tmp/connect-script
+sudo mv /tmp/connect-script /etc/openvpn/server/connect-script
+sudo chmod 755 /etc/openvpn/server/connect-script
+
 # Clean up
-rm -rf /tmp/pki /tmp/*.crt
+rm -rf /tmp/pki /tmp/*.crt /tmp/connect-script
 sudo rm -f /tmp/ta.key
 
 # OpenVPN server configuration file
@@ -70,7 +75,7 @@ keepalive 10 120
 persist-key
 persist-tun
 verb 3
-dh /etc/openvpn/server/dh.pem
+dh none
 ca /etc/openvpn/server/ca.crt
 cert /etc/openvpn/server/server.crt
 key /etc/openvpn/server/server.key
@@ -81,8 +86,8 @@ script-security 2
 EOL'
 
 # Start OpenVPN server in debug mode
-sudo openvpn /etc/openvpn/server.conf
+# sudo openvpn /etc/openvpn/server.conf
 
 # Config and run OpenVPN as system service
-# sudo systemctl -f enable openvpn@server.service
-# sudo systemctl start openvpn@server.service
+sudo systemctl -f enable openvpn@server.service
+sudo systemctl start openvpn@server.service
