@@ -1,0 +1,19 @@
+#!/bin/bash -xv
+# Script to be called when an openvpn client is connected to the openvpn server
+# It creates a bridge for an organization or add an interface to the existing bridge.
+
+exec > /tmp/connect$$.log 2>&1
+
+function create_bridge() {
+    local name=$1
+    /usr/sbin/brctl addbr ${name}
+}
+
+# common_name, dev are both env vars passed in by openvpn
+
+if [ ! -d /sys/class/net/${common_name} ]
+then
+   create_bridge $common_name
+fi
+
+/usr/sbin/brctl addif ${common_name} ${dev}
