@@ -11,12 +11,13 @@ export HOSTNAME=$( get_aws_public_hostname )
 server=13.56.255.246
 # org is the common name for the organization's CA
 org="$1"
+id="$2"
 
-[ X"$org" == X ] && {
-    echo "Usage: $0 <organizationname>"
-    echo "The org name is required"
-    exit 1
-}
+# Check arguments
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 [org common name] [server id]"
+  exit 1
+fi
 
 # install (or check for) openvpn and easyrsa
 yum --quiet update -y
@@ -36,8 +37,13 @@ rm -rf ${PKI}
 #   THIS API CALL SHOULD HAVE CREATED a server cert and created the server.conf
 #   for this "org"
 # fix server id for testing; need to set dynamically in the future
+URL=http://${server}/cert/${org}/server/${id}
+if [ $(curl --write-out "%{http_code}" --silent -o /dev/null "$URL") = 200 ]; then
+  echo "Server id already in use"
+  exit 1
+fi
 curl -X POST -H "Content-Type: application/json" \
-      -d "{\"cn\": \"${org}\", \"id\":\"000\"}" \
+      -d "{\"cn\": \"${org}\", \"id\":\"${id}\"}" \
       http://${server}/server-config
 
 # get the server config files necessary for client creation from the server
