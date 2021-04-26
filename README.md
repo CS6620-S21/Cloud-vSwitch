@@ -13,8 +13,8 @@ Cloud vSwitch will be used by the end-users of any interested users that want to
 It does not target:
 Users that do not have some basic degree of knowledge using cloud
 Users that do not need to connect to each other via cloud
+
 ## 3. Scope and Features Of The Project
-* User register/login/logout/update
 * VPN configuration (OpenStack)/connection/disconnection
 * TLS/SSL encryption
 * Access control (client certificate)
@@ -31,20 +31,19 @@ A Walkthrough Explanation of the Architectural Structure:
 
 Design Implications and Discussion:
 * Since this must be a secure connection, we use TLS for encryption. Also, access is controlled by a client certificate used on each laptop to initiate the VPN connection to the server. This means that the VPN server will act as a certificate authority.
-* Cloud platforms that were discussed: MOC, OpenStack
+* Cloud platforms that were discussed: AWS
 * Network security analysis: Zeek
 
 ## 5. Acceptance criteria
 Minimum acceptance criteria:
 
-A web application that allows users to set up an account to manage the cloud network of their organization.
-A MacOS desktop application that allows users to sign in to their organization and connect to a virtual local area network (LAN) on the Mass Open Cloud (MOC) within the organization via OpenVPN service and a virtual switch server in the network. 
+A service that allows users to connect to a virtual local area network (LAN) on the AWS via OpenVPN service and a virtual switch server in the network. 
 End user devices should be able to talk to each other as if they are on the same local network. Also, the VPN connection should be secured with TLS encryption and access is controlled by a client certificate used on each device to initiate the connection to the server.
 
 Stretch goals:
 
 Build cross-platform desktop applications that work on Windows/MacOS/Linux.
-Extend deployment from MOC to other cloud computing platforms such AWS.
+Extend deployment to other cloud computing platforms.
 Add advanced user role/resource/organization management.
 
 ## 6. Release Planning
