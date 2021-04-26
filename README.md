@@ -48,20 +48,10 @@ Add advanced user role/resource/organization management.
 
 ## 6. Release Planning
 ### Release #1 
-User creation: 
-As a user, I can register an account, so that I can log in in order to use this application.
-User login/logout:
-As a user, I can log in to the web application, so that I can manage the virtual network on the cloud in my organization. I can also log out after I have finished my work, so that I can prevent my account from potential malicious use.
-User organization:
-As a user, I can create or join an organization where I would like to work remotely with my coworkers on its virtual network.
-User profile
-As a user, I can review and update my user profile so that my account information is up to date.
-
-### Release #2 
 vSwitch server:
 As a user, I can instantiate a vSwitch server on the cloud for my organization, so that I can connect to it and work with my coworkers on the same virtual network. I can also terminate this server, so that I can save cloud resources when I do not need the server anymore. 
-Client login/logout:
-As a user, I can log in to the desktop application, so that I can connect to the virtual network on the cloud in my organization. I can also log out after I have finished my work, so that I can prevent my account from unauthorized use.
+
+### Release #2 
 VPN connection: 
 As a user, I can make a VPN connection to the virtual network in my organization, so that I can work remotely as if I am on the physical local network in my organization. I can also disconnect after I have finished my work, so that my computer network is reset to its previous state.
 Virtual LAN:
@@ -72,4 +62,6 @@ Testing, bug fixes, documentation and UI improvement.
 
 ### Release #4 (Optional)
 Feature extension based on the stretch goals.
+
+## 7. Actual Architecture and Design Decisions
 
