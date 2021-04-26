@@ -46,20 +46,17 @@ Extend deployment to other cloud computing platforms.
 Add advanced user role/resource/organization management.
 
 ## 6. Release Planning
-### Release #1 
 vSwitch server:
 As a user, I can instantiate a vSwitch server on the cloud for my organization, so that I can connect to it and work with my coworkers on the same virtual network. I can also terminate this server, so that I can save cloud resources when I do not need the server anymore. 
 
-### Release #2 
 VPN connection: 
 As a user, I can make a VPN connection to the virtual network in my organization, so that I can work remotely as if I am on the physical local network in my organization. I can also disconnect after I have finished my work, so that my computer network is reset to its previous state.
 Virtual LAN:
 As a user, I can work with other connected users as if we are on the same local network, so that our connected devices such as desktops can talk to each other directly.
 
-### Release #3
 Testing, bug fixes, documentation and UI improvement. 
 
-### Release #4 (Optional)
+(Optional)
 Feature extension based on the stretch goals.
 
 ## 7. Actual Architecture
