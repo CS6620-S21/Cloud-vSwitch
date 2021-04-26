@@ -71,6 +71,17 @@ On the client side, the client gets the CA cert from the server and generates a 
 ![wireframe](./design-decisions.png)
 
 ## 9. Actual Sprints
+### Sprint #1
+learning virtual switch concepts, agile and setting up github
+### Sprint #2
+API design and configuration setup
+### Sprint #3
+AWS configuration, setting up OpenVPN server on EC2, and building web and desktop client frontend
+### Sprint #4
+Established the client server public key infrastructure and auto-generated certificate, using client bash script to automatically generate client.config, writing api --- user auth, and API deployment on cloud
+### Sprint #5
+Writing bridge connect script, changing api and ta.key part, automate script, making final presentation
+
 
 
 
