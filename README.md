@@ -32,7 +32,6 @@ A Walkthrough Explanation of the Architectural Structure:
 Design Implications and Discussion:
 * Since this must be a secure connection, we use TLS for encryption. Also, access is controlled by a client certificate used on each laptop to initiate the VPN connection to the server. This means that the VPN server will act as a certificate authority.
 * Cloud platforms that were discussed: AWS
-* Network security analysis: Zeek
 
 ## 5. Acceptance criteria
 Minimum acceptance criteria:
